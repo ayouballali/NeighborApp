@@ -15,6 +15,7 @@ public class Answer {
 
 
     private String content ;
+    // add date atrribut and modifeyd date
 
 
 }

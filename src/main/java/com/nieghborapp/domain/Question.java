@@ -18,6 +18,7 @@ public class Question {
     private String title ;
     private String content ;
     private String location ;
+    // add date
 
     @OneToMany
     private List<Answer> answers ;
