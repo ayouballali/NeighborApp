@@ -5,7 +5,10 @@ import com.nieghborapp.dto.UserDto;
 import com.nieghborapp.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public interface IUserService {
+import java.util.Optional;
+
+public interface IUserService  {
     void save(User user) ;
-    Boolean existByEmail(String email);
+//    Boolean existByEmail(String email);
+
 }

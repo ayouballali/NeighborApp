@@ -1,13 +1,35 @@
 package com.nieghborapp;
 
+import com.nieghborapp.domain.Role;
+import com.nieghborapp.domain.User;
+import com.nieghborapp.repository.IUserRepository;
+import com.nieghborapp.repository.RoleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@SpringBootApplication
-public class NieghborAppApplication {
+import java.util.Arrays;
 
+@SpringBootApplication @RequiredArgsConstructor
+public class NieghborAppApplication implements CommandLineRunner {
+    private  final  IUserRepository userRepo ;
+    private final RoleRepository roleRepository;
     public static void main(String[] args) {
         SpringApplication.run(NieghborAppApplication.class, args);
     }
+    @Override
+    public void  run(String... strings){
+        roleRepository.save(new Role(Role.USER));
+        roleRepository.save(new Role(Role.ADMIN));
 
+        User student = new User();
+        student.setUsername("ayoub");
+        student.setPassword(new BCryptPasswordEncoder().encode("0000"));
+        student.setRoles(Arrays.asList(roleRepository.findByName(Role.USER).orElseThrow()));
+
+
+        userRepo.save(student);
+    }
 }

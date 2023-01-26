@@ -3,6 +3,7 @@ package com.nieghborapp.domain;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class User {
 
     private String name;
 
-    private String email ;
+    private String username ;
     private String password ;
 
     @OneToMany
@@ -28,6 +29,6 @@ public class User {
 
     @OneToMany
     private List<Question> favoriteQuestions ;
-    @OneToMany
-    private List<Role> roles ;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Collection<Role> roles ;
 }

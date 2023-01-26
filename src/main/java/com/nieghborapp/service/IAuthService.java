@@ -2,7 +2,7 @@ package com.nieghborapp.service;
 
 import com.nieghborapp.domain.User;
 
-public interface IAuth {
+public interface IAuthService {
     void signUp(User user);
-    void signIn(User user);
+
 }
