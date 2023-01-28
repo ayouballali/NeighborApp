@@ -28,10 +28,15 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println("i am filter ");
 // if the
-        if(request.getServletPath().equals("/api/login") || request.getServletPath().equals("/api/token/refresh") ){
+        log.info(request.getServletPath());
+        if(request.getServletPath().equals("/api/login") || request.getServletPath().equals("/api/auth/token/refresh")
+            || request.getServletPath().equals("/api/auth/register") || request.getServletPath().equals("/api/auth/register/verify")
+             ||   request.getServletPath().equals("/api/auth/all") ){
             filterChain.doFilter(request,response);
             return;
         }
+
+
         System.out.println("i am filter 1 ");
 
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);

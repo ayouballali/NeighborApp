@@ -21,8 +21,9 @@ public class NieghborAppApplication implements CommandLineRunner {
     }
     @Override
     public void  run(String... strings){
-        roleRepository.save(new Role(Role.USER));
-        roleRepository.save(new Role(Role.ADMIN));
+
+        if(!roleRepository.existsByName(Role.USER))roleRepository.save(new Role(Role.USER));
+        if(!roleRepository.existsByName(Role.ADMIN)) roleRepository.save(new Role(Role.ADMIN));
 
         User student = new User();
         student.setUsername("ayoub");
@@ -30,6 +31,6 @@ public class NieghborAppApplication implements CommandLineRunner {
         student.setRoles(Arrays.asList(roleRepository.findByName(Role.USER).orElseThrow()));
 
 
-        userRepo.save(student);
+        if(!userRepo.existsByUsername(student.getUsername()))userRepo.save(student);
     }
 }
