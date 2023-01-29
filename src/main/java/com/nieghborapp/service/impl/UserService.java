@@ -3,12 +3,15 @@ package com.nieghborapp.service.impl;
 import com.nieghborapp.domain.Role;
 import com.nieghborapp.domain.User;
 import com.nieghborapp.dto.RegisterDto;
+import com.nieghborapp.exceptions.AlreadyExistsException;
+import com.nieghborapp.exceptions.NotFoundException;
 import com.nieghborapp.repository.IUserRepository;
 import com.nieghborapp.repository.RoleRepository;
 import com.nieghborapp.service.IUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.utility.RandomString;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,7 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,20 +45,22 @@ public class UserService  implements IUserService, UserDetailsService {
                                                                     user.isCredentialsNonExpired(),user.isAccountNonLocked(),authorities);
     }
     @Override
-    public void addUser(RegisterDto registerDto, String url) throws Exception {
+    public void addUser(RegisterDto registerDto, String url) throws AlreadyExistsException, NotFoundException, MessagingException {
 
 
         // verify if user is already here
         if(userRepository.existsByUsername(registerDto.getUsername())){
-            throw new Exception("user already here ");
+            throw new AlreadyExistsException("user already here ");
         }
+
+        // TO DO :  verify if email is already here
 
         User user = new User();
         user.setPassword(new BCryptPasswordEncoder().encode(registerDto.getPassword()));
         user.setUsername(registerDto.getUsername());
         user.setEmail(registerDto.getEmail());
         user.setName(registerDto.getName());
-        user.addRole(roleRepository.findByName(Role.USER).orElseThrow());
+        user.addRole(roleRepository.findByName(Role.USER).orElseThrow(()->new NotFoundException("something went wrong in your registration ")));
         user.setEnabled(false);
 
         // set a verification code
@@ -79,7 +84,7 @@ public class UserService  implements IUserService, UserDetailsService {
                 + "Thank you,<br>"
                 + "Your company name.";
 
-        try {
+
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message);
 
@@ -100,17 +105,15 @@ public class UserService  implements IUserService, UserDetailsService {
 
 
             mailSender.send(message);
-        }catch (Exception exception){
-            log.error(exception.getMessage());
-        }
+
 
 
     }
 
 
-    public boolean verifyCode (String code ) throws Exception {
-        User user = userRepository.findByVerificationCode(code).orElseThrow(()->new Exception("user Code invalid or you already verify your account "));
-        if( user == null || user.isEnabled()){
+    public boolean verifyCode (String code ) throws NotFoundException {
+        User user = userRepository.findByVerificationCode(code).orElseThrow(()->  new NotFoundException("user Code invalid or you already verify your account "));
+        if(  user.isEnabled()){
            return false;
         }
         user.setVerificationCode(null);

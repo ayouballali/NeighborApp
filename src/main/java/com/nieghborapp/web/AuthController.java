@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nieghborapp.domain.Role;
 import com.nieghborapp.domain.User;
 import com.nieghborapp.dto.RegisterDto;
+import com.nieghborapp.exceptions.AlreadyExistsException;
+import com.nieghborapp.exceptions.NotFoundException;
 import com.nieghborapp.repository.IUserRepository;
 import com.nieghborapp.service.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -29,24 +32,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+//TODO add the feature sending  email in   a separete service
 @RestController @Slf4j
 @RequestMapping("api/auth") @RequiredArgsConstructor
 public class AuthController {
-
+ //TODO send json when i register
     private  final IUserService userService;
     private final IUserRepository userRepository;
 
     @PostMapping("/register")
-    ResponseEntity<String> register(@Valid @RequestBody RegisterDto registerDto, HttpServletRequest httpServletRequest) throws Exception {
-      try {
-          userService.addUser(registerDto,getUrl(httpServletRequest));
-      }catch (Exception exception){
-          log.error(exception.getMessage());
-          return new ResponseEntity<>(HttpStatus.CONFLICT) ;
+    ResponseEntity<String> register(@Valid @RequestBody RegisterDto registerDto, HttpServletRequest httpServletRequest) throws AlreadyExistsException, MessagingException, NotFoundException {
 
-      }
-
+        userService.addUser(registerDto,getUrl(httpServletRequest));
 
         return new ResponseEntity<>(HttpStatus.CREATED) ;
     }
@@ -59,21 +56,16 @@ public class AuthController {
     }
 
     @GetMapping("/register/verify")
-    ResponseEntity<String> verifyEmailCode (@Param("code") String code )  {
+    ResponseEntity<?> verifyEmailCode (@Param("code") String code ) throws NotFoundException {
         log.info("verifying email en cours ");
-        try{
+
             if(userService.verifyCode(code )){
                 // return success
-
                 log.info("verify email has been succeeded ");
                 return new  ResponseEntity<>(HttpStatus.ACCEPTED);
             }
-        }catch (Exception e){
-            log.error(e.getMessage());
 
-
-        }
-        return new  ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new  ResponseEntity<>(Map.of("message","the account is already enabled  "),null,HttpStatus.NOT_ACCEPTABLE);
     }
 
     @GetMapping("/all")
@@ -82,13 +74,15 @@ public class AuthController {
         return userRepository.findAll();
     }
 
+
+    //TODO put this in service
     @GetMapping("/token/refresh")
     public void tokenRefresh(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String tokenComplete = request.getHeader(HttpHeaders.AUTHORIZATION);
         log.info("refresh token en cours ");
         if(tokenComplete != null || tokenComplete.startsWith("Baerer ")){
             String refersh_token = tokenComplete.substring("Baerer ".length());
-            try {
+//            try {
                 log.info("token is starting with ");
 
                 Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
@@ -112,19 +106,19 @@ public class AuthController {
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
                 new ObjectMapper().writeValue(response.getOutputStream(),map);
-            }catch (Exception exception){
-                log.error("probkem in refresh token "+exception.getMessage());
-//             response.;
-                response.setHeader("error",exception.getMessage());
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                Map <String , String> errors = Map.of("error",exception.getMessage());
-
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), errors);
-            }
+//            }catch (Exception exception){
+//                log.error("probkem in refresh token "+exception.getMessage());
+////             response.;
+//                response.setHeader("error",exception.getMessage());
+//                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//                Map <String , String> errors = Map.of("error",exception.getMessage());
+//
+//                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//                new ObjectMapper().writeValue(response.getOutputStream(), errors);
+//            }
 
         }else {
-            throw new RuntimeException("refresh tokem is missing ");
+            throw new RuntimeException("refresh token is missing ");
         }
     }
 

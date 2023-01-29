@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.nieghborapp.domain.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,7 +23,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
-@RequiredArgsConstructor
+@RequiredArgsConstructor @Slf4j
 public class CustomeAuthentificationFilter extends UsernamePasswordAuthenticationFilter {
 
 
@@ -30,26 +31,27 @@ public class CustomeAuthentificationFilter extends UsernamePasswordAuthenticatio
 
     @Override
     public void  unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws ServletException, IOException {
-        System.out.println("iam unsuccessful authentication");
+        log.info("it's a failed authentication ");
         super.unsuccessfulAuthentication(request, response, failed);
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response){
+        log.info("attempt to authenticate ");
+
         String username = request.getParameter("username");
         String paswword = request.getParameter("password");
 
-        System.out.println(username+"gjhgjgjhghjj");
         // create authentication
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,paswword);
-        return authenticationManager.authenticate(authentication) ;
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,paswword);
+            return authenticationManager.authenticate(authentication) ;
     }
 
 
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-
+        log.info("it's a successful authentication ");
         User user = (User) authResult.getPrincipal();
         Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
 

@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,30 +27,27 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     @Override
 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("i am filter ");
+        log.info(" AUTHORIZATION FILTER IS ON ");
 // if the
         log.info(request.getServletPath());
         if(request.getServletPath().equals("/api/login") || request.getServletPath().equals("/api/auth/token/refresh")
             || request.getServletPath().equals("/api/auth/register") || request.getServletPath().equals("/api/auth/register/verify")
              ||   request.getServletPath().equals("/api/auth/all") ){
+            log.info(" PASS THE AUTHORIZATION FILTER");
             filterChain.doFilter(request,response);
             return;
         }
 
 
-        System.out.println("i am filter 1 ");
-
+        log.info("this request has to be authorized ");
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-
-//            filterChain.doFilter(request,response);
-            response.sendError(HttpStatus.FORBIDDEN.value());
             log.error("authorization header not valid");
+            response.sendError(HttpStatus.FORBIDDEN.value());
             return;
         }
 
-        System.out.println("i am filter 2");
-
+        log.info("checking if this token is valid ");
         // get the token
         String token = authorizationHeader.substring("Bearer ".length());
 
