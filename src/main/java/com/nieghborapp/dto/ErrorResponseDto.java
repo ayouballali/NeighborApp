@@ -10,6 +10,7 @@ import java.util.Date;
 @Data @RequiredArgsConstructor @AllArgsConstructor
 public class ErrorResponseDto {
     int httpStatus;
+
     String message ;
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "dd-mm-yyyy hh:mm:ss")
     @LastModifiedDate

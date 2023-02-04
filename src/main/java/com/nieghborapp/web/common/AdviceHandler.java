@@ -15,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.mail.MessagingException;
@@ -27,29 +28,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-@ControllerAdvice @Slf4j
-public class AdviceHandler implements AuthenticationEntryPoint {
+@RestControllerAdvice
+@Slf4j
+public class AdviceHandler  {
 
-    //TODO create an exceptin handler for bas credentials
 
 
     @ExceptionHandler(AlreadyExistsException.class)
     ResponseEntity<ErrorResponseDto> handleAlreadyExistsException(AlreadyExistsException ex, WebRequest req){
 
-        log.error(ex.getMessage());
+        log.error("handleAlreadyExistsException "+ex.getMessage());
         return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(),ex.getMessage()),null, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler (MessagingException.class)
     ResponseEntity<ErrorResponseDto> handleMessagingException(MessagingException ex,WebRequest req){
-        log.error(ex.getMessage());
+        log.error("handleMessagingException   "+ex.getMessage());
 
         return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(),"error in sending you email "),null ,HttpStatus.EXPECTATION_FAILED);
     }
 
     @ExceptionHandler(NotFoundException.class)
     ResponseEntity<ErrorResponseDto> handleNotFoundException(NotFoundException ex,WebRequest req){
-        log.error(ex.getMessage());
+        log.error("handleNotFoundException  "+ex.getMessage());
 
         return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.NOT_FOUND.value(), ex.getMessage()),null,HttpStatus.NOT_FOUND);
     }
@@ -60,6 +61,13 @@ public class AdviceHandler implements AuthenticationEntryPoint {
         log.error(ex.getMessage());
 
         return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "problem with refreshing the token "),null,HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<ErrorResponseDto> handleException(Exception ex,WebRequest req){
+        log.error("handleException"+ex.getMessage());
+
+        return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), " internal problem  "),null,HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -81,17 +89,22 @@ public class AdviceHandler implements AuthenticationEntryPoint {
         return new ResponseEntity<>(errors,new HttpHeaders(),HttpStatus.BAD_REQUEST );
     }
 
-    @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        log.error(authException.getMessage());
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//    @Override
+//    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+//        log.error("this is commence from Advice "+authException.getMessage());
+//        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//
+//        Map<String ,String > errors = Map.of("error",authException.getMessage());
+//
+//        new ObjectMapper().writeValue(response.getOutputStream(),errors);
+//    }
 
-        Map<String ,String > errors = Map.of("error",authException.getMessage());
-
-        new ObjectMapper().writeValue(response.getOutputStream(),errors);
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponseDto> handleRuntimeException(RuntimeException exception,HttpServletRequest request){
+        log.error("handleRuntimeException   "+exception.getMessage());
+        return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.UNAUTHORIZED.value(), exception.getMessage()),null,HttpStatus.UNAUTHORIZED);
     }
-
     @ExceptionHandler(AccessDeniedException.class)
     public void handleAccessDeniedException (HttpServletRequest req,HttpServletResponse res , AccessDeniedException ex) throws IOException {
         log.error(ex.getMessage());
@@ -103,4 +116,14 @@ public class AdviceHandler implements AuthenticationEntryPoint {
 
         new ObjectMapper().writeValue(res.getOutputStream(),errors);
     }
+
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponseDto> handleAuthenticationException(AuthenticationException exception){
+        log.error(exception.getMessage());
+        return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.UNAUTHORIZED.value(), exception.getMessage()),null,HttpStatus.UNAUTHORIZED);
+
+    }
+
+
 }

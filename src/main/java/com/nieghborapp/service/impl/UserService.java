@@ -1,7 +1,13 @@
 package com.nieghborapp.service.impl;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nieghborapp.domain.Role;
 import com.nieghborapp.domain.User;
+import com.nieghborapp.dto.EmailDto;
 import com.nieghborapp.dto.RegisterDto;
 import com.nieghborapp.exceptions.AlreadyExistsException;
 import com.nieghborapp.exceptions.NotFoundException;
@@ -12,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.utility.RandomString;
 
+import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,7 +32,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -33,7 +44,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor @Slf4j
 public class UserService  implements IUserService, UserDetailsService {
     private final IUserRepository userRepository ;
-    private final JavaMailSender mailSender ;
+
+    private final EmailService emailService;
     private final RoleRepository roleRepository;
 
     @Override
@@ -85,26 +97,16 @@ public class UserService  implements IUserService, UserDetailsService {
                 + "Your company name.";
 
 
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper messageHelper = new MimeMessageHelper(message);
 
-            messageHelper.setSubject(subject);
-            messageHelper.setTo(toAddress);
-            messageHelper.setFrom(senderEmail);
+        content = content.replace("[[name]]",user.getName());
 
-            content = content.replace("[[name]]",user.getName());
+        String verifyUrl = url+"/verify?code="+user.getVerificationCode();
 
-            String verifyUrl = url+"/verify?code="+user.getVerificationCode();
+        log.warn(verifyUrl);
+        content = content.replace("[[URL]]",verifyUrl);
 
-            log.warn(verifyUrl);
-
-            content = content.replace("[[URL]]",verifyUrl);
-
-            messageHelper.setText(content,true);
-            log.info("before sending message ");
-
-
-            mailSender.send(message);
+        EmailDto emailDto = new EmailDto(toAddress,senderEmail,subject,content);
+        emailService.sendEmail(emailDto);
 
 
 
@@ -123,5 +125,43 @@ public class UserService  implements IUserService, UserDetailsService {
         return true;
 
 
+    }
+
+
+    @Override
+    public void refreshToken(String tokenComplete, HttpServletResponse response) throws IOException {
+
+        log.info("refresh token en cours ");
+        if(tokenComplete != null || tokenComplete.startsWith("Baerer ")){
+            String refersh_token = tokenComplete.substring("Baerer ".length());
+
+            log.info("token is starting with ");
+
+            Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256("secret")).build();
+
+            DecodedJWT decodedJWT = jwtVerifier.verify(refersh_token);
+
+            String username = decodedJWT.getSubject();
+
+            User user = userRepository.findByUsername(username).orElseThrow(()->new UsernameNotFoundException("username not found"));
+
+            String accessToken = JWT.create()
+                    .withSubject(user.getUsername())
+                    .withClaim("roles",user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+                    .withExpiresAt(new Date(System.currentTimeMillis()+1000*60*5000))
+                    .sign(algorithm);
+
+
+            Map<String,String> map = Map.of("access_token",accessToken,"refresh_token",refersh_token);
+
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+            new ObjectMapper().writeValue(response.getOutputStream(),map);
+
+
+        }else {
+            throw new RuntimeException("refresh token is missing ");
+        }
     }
 }

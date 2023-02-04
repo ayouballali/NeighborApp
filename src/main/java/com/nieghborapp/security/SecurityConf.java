@@ -1,6 +1,7 @@
 package com.nieghborapp.security;
 
 import com.nieghborapp.domain.Role;
+import com.nieghborapp.filters.CustomAuthenticationfailure;
 import com.nieghborapp.filters.CustomAuthorizationFilter;
 import com.nieghborapp.filters.CustomeAuthentificationFilter;
 import com.nieghborapp.service.IUserService;
@@ -19,7 +20,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import javax.servlet.FilterChain;
 
@@ -29,6 +32,9 @@ public class SecurityConf {
     private    UserService userservice ;
     @Autowired
     private  PasswordEncoder passwordEncoder1 ;
+//    @Autowired
+//    private CustomAuthenticationfailure customAuthenticationfailure;
+//    @Autowired ExceptionHandlingFilter exceptionHandlingFilter;
 
    // authmanger
     @Bean
@@ -52,7 +58,9 @@ public class SecurityConf {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) throws Exception {
 
         CustomeAuthentificationFilter customeAuthentificationFilter = new CustomeAuthentificationFilter(authenticationManager);
+        customeAuthentificationFilter.setAuthenticationFailureHandler(customAuthenticationfailure());
         customeAuthentificationFilter.setFilterProcessesUrl("/api/login");
+
 
         httpSecurity
                 .csrf().disable()
@@ -76,5 +84,12 @@ public class SecurityConf {
 
         return httpSecurity.build();
     }
+
+    @Bean
+    public AuthenticationFailureHandler customAuthenticationfailure(){
+        return new CustomAuthenticationfailure();
+    }
+
+
 
 }

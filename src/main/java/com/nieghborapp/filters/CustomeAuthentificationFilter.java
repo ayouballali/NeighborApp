@@ -8,11 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -31,20 +33,29 @@ public class CustomeAuthentificationFilter extends UsernamePasswordAuthenticatio
 
     @Override
     public void  unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws ServletException, IOException {
-        log.info("it's a failed authentication ");
-        super.unsuccessfulAuthentication(request, response, failed);
+             log.error("it's a failed authentication "+failed.getMessage());
+            super.unsuccessfulAuthentication(request, response, failed);
+
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response){
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)throws AuthenticationException{
         log.info("attempt to authenticate ");
 
         String username = request.getParameter("username");
         String paswword = request.getParameter("password");
 
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,paswword);
         // create authentication
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,paswword);
-            return authenticationManager.authenticate(authentication) ;
+        Authentication auth = null;
+//        try {
+            auth = authenticationManager.authenticate(authentication);
+//        }catch (A e){
+//          log.error(e.getMessage());
+//          throw new ;
+//        }
+        return  auth ;
+
     }
 
 
