@@ -16,4 +16,5 @@ public interface IQuestionService {
     Question updateQuestion(Authentication authentication, Long id, Question question) throws Exception  ;
     void addToFavorite(Authentication authentication,Long postId) throws NotFoundException;
     List<Question> getFavoriteByUser(Authentication authentication) throws NotFoundException;
+    void deleteFavorite(Authentication authentication,Long id) throws NotFoundException;
 }

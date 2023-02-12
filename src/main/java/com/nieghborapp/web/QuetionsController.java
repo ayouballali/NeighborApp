@@ -59,6 +59,12 @@ public class QuetionsController {
        return new ResponseEntity<>(questioService.getFavoriteByUser(authentication),null,HttpStatus.ACCEPTED);
     }
 
+    @DeleteMapping("/favorite/{id}")
+    void deleteFavorite (Authentication authentication,@PathVariable Long id ) throws NotFoundException {
+        log.info("deleting the the favorite ");
+        questioService.deleteFavorite(authentication,id)   ;
+    }
+
 
     @GetMapping("/user")
     ResponseEntity<List<Question>> getUserQuestions(Authentication authentication){
