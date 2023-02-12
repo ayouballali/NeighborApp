@@ -4,24 +4,18 @@ import lombok.Data;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "ANSWER")
-@Data
-public class Answer {
+@Entity     @Data
+public class Favorite {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
-
-
-    private String content ;
-    //TODO add date atrribut and modifeyd date
+    //TODO ADD DATE WHEN IT HAS BEEN ADDED
+    @ManyToOne
+    private User user ;
 
     @ManyToOne
-    private User userId;
-
-    @ManyToOne
-    private Question questionId;
+    private Question question;
 
 
 }

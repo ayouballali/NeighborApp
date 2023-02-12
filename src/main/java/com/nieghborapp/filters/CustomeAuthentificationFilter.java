@@ -45,20 +45,20 @@ public class CustomeAuthentificationFilter extends UsernamePasswordAuthenticatio
         String username = request.getParameter("username");
         String paswword = request.getParameter("password");
 
+        //TODO VALIDATE THE USERNAME AND THE PASSEORD BEFORE
+
+        log.info(username+" "+paswword);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,paswword);
         // create authentication
         Authentication auth = null;
-//        try {
+
             auth = authenticationManager.authenticate(authentication);
-//        }catch (A e){
-//          log.error(e.getMessage());
-//          throw new ;
-//        }
+
         return  auth ;
 
     }
 
-
+//TODO SEND THE USER WHEN HE LOGED IN
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
@@ -69,13 +69,13 @@ public class CustomeAuthentificationFilter extends UsernamePasswordAuthenticatio
         String accessToken = JWT.create()
                 .withSubject(user.getUsername())
                 .withIssuer(request.getRequestURI())
-                .withExpiresAt(new Date(System.currentTimeMillis()+1000*60*10))
+                .withExpiresAt(new Date(System.currentTimeMillis()+1000*60*10*100))
                 .withClaim("roles",user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm);
 
         String refreshToken = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis()+1000*60*500))
+                .withExpiresAt(new Date(System.currentTimeMillis()+ 1000L *60*500*1000))
                 .withIssuer(request.getRequestURI())
                 .sign(algorithm);
 

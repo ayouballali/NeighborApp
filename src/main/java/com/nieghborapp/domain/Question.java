@@ -1,5 +1,6 @@
 package com.nieghborapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 
@@ -22,6 +23,9 @@ public class Question {
 
     @OneToMany
     private List<Answer> answers ;
+
+    @ManyToOne @JsonIgnore
+    private User user;
 
 
 }

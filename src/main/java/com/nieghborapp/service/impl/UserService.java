@@ -65,7 +65,7 @@ public class UserService  implements IUserService, UserDetailsService {
             throw new AlreadyExistsException("user already here ");
         }
 
-        // TO DO :  verify if email is already here
+        // TODO :  verify if email is already here
 
         User user = new User();
         user.setPassword(new BCryptPasswordEncoder().encode(registerDto.getPassword()));

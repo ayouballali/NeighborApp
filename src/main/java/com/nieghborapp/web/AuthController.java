@@ -27,6 +27,7 @@ import java.util.Map;
 @RestController @Slf4j
 @RequestMapping("api/auth") @RequiredArgsConstructor
 public class AuthController {
+    //TODO CREATE A SERVICE FOR THE AUTHENTIFICATION
     private  final IUserService userService;
     private final IUserRepository userRepository;
 
@@ -39,7 +40,6 @@ public class AuthController {
     }
 
     // this is a helper to get the base root
-
     String getUrl(HttpServletRequest httpServletRequest){
         String requestUrl = httpServletRequest.getRequestURL().toString();
         return requestUrl.replace(httpServletRequest.getContextPath(),"");
@@ -71,8 +71,6 @@ public class AuthController {
         String tokenComplete = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         userService.refreshToken(tokenComplete,response);
-
-
     }
 
 

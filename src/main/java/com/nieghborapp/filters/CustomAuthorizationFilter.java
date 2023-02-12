@@ -32,7 +32,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         log.info(request.getServletPath());
         if(request.getServletPath().equals("/api/login") || request.getServletPath().equals("/api/auth/token/refresh")
             || request.getServletPath().equals("/api/auth/register") || request.getServletPath().equals("/api/auth/register/verify")
-             ||   request.getServletPath().equals("/api/auth/all") ){
+              ){
             log.info(" PASS THE AUTHORIZATION FILTER");
             filterChain.doFilter(request,response);
             return;
@@ -41,6 +41,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
         log.info("this request has to be authorized ");
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        log.info("this is token "+authorizationHeader);
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             log.error("authorization header not valid");
             response.sendError(HttpStatus.FORBIDDEN.value());

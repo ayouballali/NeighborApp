@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.*;
-
+//TODO  ADD THE CTRATED DATE AND UPDATED DATE
 @Entity
 @Table(name = "USER")
 @Data
@@ -25,19 +25,18 @@ public class User implements UserDetails {
     private String  verificationCode ;
     private String email;
 
-    @OneToMany
-    private List<Answer> answers ;
-    @OneToMany
-    private List<Question> writedQuetions ;
 
-    @OneToMany
-    private List<Question> favoriteQuestions ;
+
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new ArrayList<>() ;
 
     public void addRole(Role role){
         roles.add(role);
     }
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
