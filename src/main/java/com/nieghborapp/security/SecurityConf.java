@@ -4,8 +4,11 @@ import com.nieghborapp.domain.Role;
 import com.nieghborapp.filters.CustomAuthenticationfailure;
 import com.nieghborapp.filters.CustomAuthorizationFilter;
 import com.nieghborapp.filters.CustomeAuthentificationFilter;
+import com.nieghborapp.filters.ExceptionHandlingFilter;
+import com.nieghborapp.repository.IUserRepository;
 import com.nieghborapp.service.IUserService;
 import com.nieghborapp.service.impl.UserService;
+import com.nieghborapp.web.common.AdviceHandler;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,21 +26,21 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import javax.servlet.FilterChain;
 
-@Configuration  @EnableGlobalMethodSecurity(prePostEnabled = true) @EnableWebSecurity
+@Configuration @RequiredArgsConstructor  @EnableGlobalMethodSecurity(prePostEnabled = true) @EnableWebSecurity
 public class SecurityConf {
-    @Autowired
-    private    UserService userservice ;
-    @Autowired
-    private  PasswordEncoder passwordEncoder1 ;
-//    @Autowired
-//    private CustomAuthenticationfailure customAuthenticationfailure;
-//    @Autowired ExceptionHandlingFilter exceptionHandlingFilter;
+
+    private final    UserService userservice ;
+
+    private final PasswordEncoder passwordEncoder1;
+
 
    // authmanger
     @Bean
@@ -58,9 +61,9 @@ public class SecurityConf {
 
     // filter chain
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager, IUserRepository userRepository, AdviceHandler adviceHandler) throws Exception {
 
-        CustomeAuthentificationFilter customeAuthentificationFilter = new CustomeAuthentificationFilter(authenticationManager);
+        CustomeAuthentificationFilter customeAuthentificationFilter = new CustomeAuthentificationFilter(authenticationManager,userRepository);
         customeAuthentificationFilter.setAuthenticationFailureHandler(customAuthenticationfailure());
         customeAuthentificationFilter.setFilterProcessesUrl("/api/login");
 
@@ -86,6 +89,7 @@ public class SecurityConf {
 
                 httpSecurity.addFilter(customeAuthentificationFilter);
                 httpSecurity.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(new ExceptionHandlingFilter(adviceHandler), LogoutFilter.class);
 
         return httpSecurity.build();
     }

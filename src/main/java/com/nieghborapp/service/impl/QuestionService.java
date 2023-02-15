@@ -97,6 +97,7 @@ public class QuestionService implements IQuestionService {
 
     @Override
     public void deleteFavorite(Authentication authentication, Long id) throws NotFoundException {
+        //TODO IF YOU DELETE A POST THE ANSWERS SHOULD BE DELETED 
         User loggedUser = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new NotFoundException("something went wrong "));
         Question questionToDelete = questionRepository.findById(id).orElseThrow(()->new NotFoundException("the question doesn't exist"));
         favoriteRepository.deleteByQuestion(questionToDelete);

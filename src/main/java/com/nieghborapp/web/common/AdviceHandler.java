@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nieghborapp.dto.ErrorResponseDto;
 import com.nieghborapp.exceptions.AlreadyExistsException;
 import com.nieghborapp.exceptions.NotFoundException;
+import com.nieghborapp.exceptions.NotValidRunTimeException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -100,10 +102,11 @@ public class AdviceHandler  {
 //        new ObjectMapper().writeValue(response.getOutputStream(),errors);
 //    }
 
+    @Primary
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponseDto> handleRuntimeException(RuntimeException exception,HttpServletRequest request){
+    public ResponseEntity<?> handleRuntimeException(RuntimeException exception){
         log.error("handleRuntimeException   "+exception.getMessage());
-        return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.UNAUTHORIZED.value(), exception.getMessage()),null,HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>( exception.getMessage(),null,HttpStatus.UNAUTHORIZED);
     }
     @ExceptionHandler(AccessDeniedException.class)
     public void handleAccessDeniedException (HttpServletRequest req,HttpServletResponse res , AccessDeniedException ex) throws IOException {
@@ -120,6 +123,12 @@ public class AdviceHandler  {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponseDto> handleAuthenticationException(AuthenticationException exception){
+        log.error(exception.getMessage());
+        return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.UNAUTHORIZED.value(), exception.getMessage()),null,HttpStatus.UNAUTHORIZED);
+
+    }
+    @ExceptionHandler(NotValidRunTimeException.class)
+    ResponseEntity<ErrorResponseDto> handleNotValidException(NotValidRunTimeException exception){
         log.error(exception.getMessage());
         return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.UNAUTHORIZED.value(), exception.getMessage()),null,HttpStatus.UNAUTHORIZED);
 

@@ -1,5 +1,6 @@
 package com.nieghborapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,9 +20,11 @@ public class User implements UserDetails {
     private String name;
 
     private String username ;
+    @JsonIgnore
     private String password ;
 
     private boolean isEnabled ;
+    @JsonIgnore
     private String  verificationCode ;
     private String email;
 
@@ -37,23 +40,24 @@ public class User implements UserDetails {
     }
 
 
+    @JsonIgnore
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         return null;
     }
-
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return isEnabled;
     }
-
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return isEnabled;
     }
-
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return isEnabled;
