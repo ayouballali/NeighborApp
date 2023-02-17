@@ -16,8 +16,8 @@ public class Role {
     public static final String USER = "USER";
     public static final String ADMIN = "ADMIN";
 
-    public Role(String user) {
-        name = user;
+    public Role(String roleName) {
+        name = roleName;
     }
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

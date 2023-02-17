@@ -1,7 +1,9 @@
 package com.nieghborapp.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -10,7 +12,7 @@ import java.util.*;
 //TODO  ADD THE CTRATED DATE AND UPDATED DATE
 @Entity
 @Table(name = "USER")
-@Data
+@Data          @RequiredArgsConstructor
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
