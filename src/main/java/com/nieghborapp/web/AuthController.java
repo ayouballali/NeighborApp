@@ -7,6 +7,7 @@ import com.nieghborapp.dto.RegisterDto;
 import com.nieghborapp.exceptions.AlreadyExistsException;
 import com.nieghborapp.exceptions.NotFoundException;
 import com.nieghborapp.repository.IUserRepository;
+import com.nieghborapp.service.IAuthService;
 import com.nieghborapp.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +28,8 @@ import java.util.Map;
 @RestController @Slf4j
 @RequestMapping("api/auth") @RequiredArgsConstructor
 public class AuthController {
-    //TODO CREATE A SERVICE FOR THE AUTHENTIFICATION
-    private  final IUserService userService;
+
+    private  final IAuthService userService;
     private final IUserRepository userRepository;
 
     @PostMapping("/register")

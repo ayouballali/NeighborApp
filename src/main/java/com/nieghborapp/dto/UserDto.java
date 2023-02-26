@@ -17,5 +17,7 @@ public class UserDto {
     @Email(message = "not a valid email")
     private String email ;
 
+    private String password ;
+
 
 }

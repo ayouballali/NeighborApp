@@ -6,8 +6,9 @@ import com.nieghborapp.filters.CustomAuthorizationFilter;
 import com.nieghborapp.filters.CustomeAuthentificationFilter;
 import com.nieghborapp.filters.ExceptionHandlingFilter;
 import com.nieghborapp.repository.IUserRepository;
+import com.nieghborapp.service.IAuthService;
 import com.nieghborapp.service.IUserService;
-import com.nieghborapp.service.impl.UserService;
+import com.nieghborapp.service.impl.AuthService;
 import com.nieghborapp.web.common.AdviceHandler;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ import javax.servlet.FilterChain;
 @Configuration @RequiredArgsConstructor  @EnableGlobalMethodSecurity(prePostEnabled = true) @EnableWebSecurity
 public class SecurityConf {
 
-    private final    UserService userservice ;
+    private final AuthService userservice ;
 
     private final PasswordEncoder passwordEncoder1;
 

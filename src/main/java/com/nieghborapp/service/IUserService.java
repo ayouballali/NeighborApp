@@ -2,7 +2,6 @@ package com.nieghborapp.service;
 
 import com.nieghborapp.domain.User;
 import com.nieghborapp.dto.RegisterDto;
-import com.nieghborapp.dto.UserDto;
 import com.nieghborapp.exceptions.AlreadyExistsException;
 import com.nieghborapp.exceptions.NotFoundException;
 import com.nieghborapp.repository.IUserRepository;
